@@ -1,0 +1,7 @@
+Asegúrate de estar en el directorio correcto:
+
+cd "/workspaces/-M-TODOS-OPTIMIZACION/Clase 7 Desarollar aplicacion/Aplicacion/"
+
+Ejecuta el comando de Streamlit desde ese directorio:
+
+streamlit run app.py --server.enableCORS false --server.enableXsrfProtection false
