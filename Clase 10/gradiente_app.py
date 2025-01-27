@@ -1,16 +1,22 @@
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
+import sympy as sp
 
 # Configuración de la app
 st.title("Método de Descenso del Gradiente")
-st.write("Simulación del método de descenso del gradiente en una función cuadrática.")
+st.write("Simulación del método de descenso del gradiente para minimizar una función simbólica.")
 
-# Función a minimizar: f(x) = ax^2 + bx + c
-st.sidebar.header("Parámetros de la función")
-a = st.sidebar.slider("Coeficiente a", 0.1, 5.0, 1.0, step=0.1)
-b = st.sidebar.slider("Coeficiente b", -10.0, 10.0, 0.0, step=0.1)
-c = st.sidebar.slider("Coeficiente c", -10.0, 10.0, 0.0, step=0.1)
+# Entrada de la ecuación desde el teclado
+st.sidebar.header("Entrada de la función")
+equation = st.sidebar.text_input("Ingresa la función f(x):", value="x**2 - 4*x + 4")
+x_symbol = sp.Symbol("x")  # Variable simbólica
+try:
+    f_expr = sp.sympify(equation)  # Convierte la ecuación a simbólica
+    f_derivative = sp.diff(f_expr, x_symbol)  # Calcula la derivada simbólica
+except sp.SympifyError:
+    st.sidebar.error("La función ingresada no es válida. Usa solo 'x' como variable.")
+    st.stop()
 
 # Parámetros del algoritmo
 st.sidebar.header("Parámetros del algoritmo")
@@ -18,12 +24,9 @@ learning_rate = st.sidebar.slider("Tasa de aprendizaje", 0.01, 1.0, 0.1, step=0.
 iterations = st.sidebar.slider("Iteraciones máximas", 10, 500, 100, step=10)
 x0 = st.sidebar.slider("Valor inicial (x0)", -10.0, 10.0, 0.0, step=0.1)
 
-# Definición de la función y su derivada
-def f(x):
-    return a * x**2 + b * x + c
-
-def grad_f(x):
-    return 2 * a * x + b
+# Conversión de funciones simbólicas a funciones numéricas
+f = sp.lambdify(x_symbol, f_expr, "numpy")
+grad_f = sp.lambdify(x_symbol, f_derivative, "numpy")
 
 # Implementación del descenso del gradiente
 x = x0
@@ -37,7 +40,7 @@ for _ in range(iterations):
     if abs(grad) < 1e-6:
         break
 
-# Crear gráfico
+# Crear el gráfico
 x_vals = np.linspace(min(history) - 1, max(history) + 1, 500)
 y_vals = f(x_vals)
 
@@ -54,6 +57,8 @@ ax.grid()
 # Mostrar resultados
 st.pyplot(fig)
 st.write("### Resultados:")
+st.write(f"Función ingresada: {equation}")
+st.write(f"Derivada calculada: {f_derivative}")
 st.write(f"Valor inicial: {x0}")
 st.write(f"Valor mínimo encontrado: {x:.4f}")
 st.write(f"f(x) mínimo: {f(x):.4f}")
